@@ -28,7 +28,7 @@
   h1 { text-align:center; margin: 8px 0 14px; }
 
   .card{
-    width: 420px;
+    width: min(92vw, 420px);
     aspect-ratio: 3 / 4;
     margin: 0 auto;
 
@@ -42,6 +42,12 @@
       #cfe4ff 55%,
       #b9d7ff 100%
     );
+
+    @media (max-width: 480px){
+  .card{
+    aspect-ratio: 3 / 4;
+  }
+}
 
     border: 6px solid rgba(255,255,255,0.92);
 
