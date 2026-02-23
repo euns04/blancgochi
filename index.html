@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>블랑고치</title>
+
+<style>
+body {
+  font-family: system-ui;
+  max-width: 420px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.pet {
+  width: 100%;
+  border-radius: 16px;
+  background: #f3f3f3;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.pet img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition: opacity 200ms ease;
+}
+
+.fade-out{
+  opacity: 0;
+}
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:12px;
+  flex-wrap:nowrap;
+  font-size:13px;
+}
+
+h1 { text-align:center; }
+
+.actions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+
+.actions button{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:0;
+  font-size:14px;
+  background:#f0f0f0;
+  aspect-ratio:1/1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.actions button:disabled{
+  opacity:0.55;
+}
+</style>
+</head>
+
+<body>
+<h1>&hearts;블랑고치&hearts;</h1>
+
+<div class="card">
+
+  <div class="pet">
+    <img id="petImg"  />
+  </div>
+
+  <div class="row">
+    <div>배고픔: <b id="hungerText">50</b>/100</div>
+    <div>행복: <b id="happyText">50</b>/100</div>
+    <div>청결: <b id="cleanText">60</b>/100</div>
+    <div>에너지: <b id="energyText">60</b>/100</div>
+  </div>
+
+  <div class="actions">
+    <button id="feedBtn">🍖<br>밥</button>
+    <button id="playBtn">🎾<br>놀기</button>
+    <button id="bathBtn">🛁<br>목욕</button>
+    <button id="sleepBtn">😴<br>재우기</button>
+  </div>
+
+</div>
+
+<script>
+  // 숫자 클수록 좋은 상태(배고픔=배부름)
+  let hunger = Number(localStorage.getItem("hunger")) || 50;
+  let happiness = Number(localStorage.getItem("happiness")) || 50;
+  let cleanliness = Number(localStorage.getItem("cleanliness")) || 60;
+  let energy = Number(localStorage.getItem("energy")) || 60;
+
+  const hungerText = document.getElementById("hungerText");
+  const happyText = document.getElementById("happyText");
+  const cleanText = document.getElementById("cleanText");
+  const energyText = document.getElementById("energyText");
+
+  const petImg = document.getElementById("petImg");
+
+  const feedBtn = document.getElementById("feedBtn");
+  const playBtn = document.getElementById("playBtn");
+  const bathBtn = document.getElementById("bathBtn");
+  const sleepBtn = document.getElementById("sleepBtn");
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+  function save() {
+    localStorage.setItem("hunger", hunger);
+    localStorage.setItem("happiness", happiness);
+    localStorage.setItem("cleanliness", cleanliness);
+    localStorage.setItem("energy", energy);
+  }
+
+  // ✅ 기본(접속할 때마다 랜덤 1장)
+  const DEFAULTS = ["dog_default1.jpg", "dog_default2.jpg", "dog_default3.jpg"];
+  let currentDefault = DEFAULTS[Math.floor(Math.random() * DEFAULTS.length)];
+
+  // ✅ hungry 상태 이미지
+  const HUNGRY_IMG = "dog_hungry.jpg";
+
+  // ✅ 액션(잠깐 행동사진) 타이머
+  let actionTimer = null;
+
+  function applyIdleImage() {
+    if (hunger <= 15) petImg.src = HUNGRY_IMG;
+    else petImg.src = currentDefault;
+  }
+
+  function setActionImage(src){
+  petImg.classList.add("fade-out");
+
+  setTimeout(()=>{
+    petImg.src = src;
+    petImg.classList.remove("fade-out");
+  }, 200);
+}
+
+  function flashImage(src, duration = 800) {
+    if (actionTimer) clearTimeout(actionTimer);
+
+    setActionImage(src);
+
+    actionTimer = setTimeout(() => {
+      applyIdleImage();  //행동 끝나면 상태 복귀
+      actionTimer = null;
+    }, duration);
+  }
+
+  function render() {
+    hungerText.textContent = hunger;
+    happyText.textContent = happiness;
+    cleanText.textContent = cleanliness;
+    energyText.textContent = energy;
+
+    if (energy < 10) {
+      playBtn.disabled = true;
+      playBtn.innerHTML = "🎾<br>에너지↓";
+    } else {
+      playBtn.disabled = false;
+      playBtn.innerHTML = "🎾<br>놀기";
+    }
+
+    // ✅ 액션 중 아닐 때 상태에 맞는 이미지 유지
+    if (!actionTimer) applyIdleImage();
+
+    save();
+  }
+
+  // ✅ 초기 기본 이미지 세팅
+  petImg.src = currentDefault;
+  applyIdleImage();
+
+  // 🍖 밥: eat1/eat2 랜덤
+  feedBtn.addEventListener("click", () => {
+    const EATS = ["dog_eat1.jpg", "dog_eat2.jpg"];
+    const randomEat = EATS[Math.floor(Math.random() * EATS.length)];
+    flashImage(randomEat, 800);
+
+    hunger = clamp(hunger + 15, 0, 100);
+    cleanliness = clamp(cleanliness - 2, 0, 100);
+    render();
+  });
+
+  // 🎾 놀기: play1
+  playBtn.addEventListener("click", () => {
+    if (energy < 10) return;
+
+    flashImage("dog_play1.jpg", 800);
+
+    happiness = clamp(happiness + 15, 0, 100);
+    energy = clamp(energy - 12, 0, 100);
+    hunger = clamp(hunger - 6, 0, 100);
+    cleanliness = clamp(cleanliness - 4, 0, 100);
+    render();
+  });
+
+  // 🛁 목욕: dog_bath
+  bathBtn.addEventListener("click", () => {
+    flashImage("dog_bath.jpg", 800);
+
+    cleanliness = clamp(cleanliness + 25, 0, 100);
+    energy = clamp(energy - 4, 0, 100);
+    happiness = clamp(happiness - 1, 0, 100);
+    render();
+  });
+
+  // 😴 재우기: sleep1~3 랜덤
+  sleepBtn.addEventListener("click", () => {
+    const SLEEPS = ["dog_sleep1.jpg", "dog_sleep2.jpg", "dog_sleep3.jpg"];
+    const randomSleep = SLEEPS[Math.floor(Math.random() * SLEEPS.length)];
+    flashImage(randomSleep, 900);
+
+    energy = clamp(energy + 30, 0, 100);
+    happiness = clamp(happiness + 5, 0, 100);
+    hunger = clamp(hunger - 5, 0, 100);
+    render();
+  });
+
+  // ⏳ 시간 경과(10초마다)
+  setInterval(() => {
+    hunger = clamp(hunger - 4, 0, 100);
+    energy = clamp(energy - 2, 0, 100);
+    cleanliness = clamp(cleanliness - 2, 0, 100);
+    happiness = clamp(happiness - 2, 0, 100);
+    render();
+  }, 10000);
+
+  render();
+</script>
+</body>
+</html>
