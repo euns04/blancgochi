@@ -434,7 +434,7 @@ function applyIdleImage() {
   });
 
   sleepBtn.addEventListener("click", () => {
-    const SLEEPS = ["dog_sleep1.jpg", "dog_sleep2.jpg", "dog_sleep3.jpg"];
+    const SLEEPS = ["dog_sleep1.jpg", "dog_sleep2.jpg"];
     const randomSleep = SLEEPS[Math.floor(Math.random() * SLEEPS.length)];
     flashImage(randomSleep, 1000);
     energy = clamp(energy + 30, 0, 100);
