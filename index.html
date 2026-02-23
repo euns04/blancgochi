@@ -6,142 +6,265 @@
 <title>블랑고치</title>
 
 <style>
+  *{ box-sizing:border-box; }
+
+  body{
+    font-family: system-ui;
+    max-width: 420px;
+    margin: 24px auto;
+    padding: 0 16px;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(255,255,255,0.5), transparent 50%),
+      linear-gradient(
+        to bottom,
+        #cfefff 0%,
+        #e9fbff 45%,
+        #9be29f 46%,
+        #63d36d 100%
+      );
+  }
+
+  h1 { text-align:center; margin: 8px 0 14px; }
+
+  .card{
+    width: 420px;
+    aspect-ratio: 3 / 4;
+    margin: 0 auto;
+
+    border-radius: 60% 60% 46% 46% / 70% 70% 40% 40%;
+    padding: 62px 18px 28px;
+    position: relative;
+    overflow: hidden;
+
+    background: linear-gradient(180deg,
+      #e9f3ff 0%,
+      #cfe4ff 55%,
+      #b9d7ff 100%
+    );
+
+    border: 6px solid rgba(255,255,255,0.92);
+
+    box-shadow:
+      0 20px 40px rgba(0,0,0,0.16),
+      0 6px 14px rgba(0,0,0,0.10),
+      inset 0 3px 10px rgba(255,255,255,0.85),
+      inset 0 -18px 24px rgba(0,0,0,0.06);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity: .55;
+    background:
+      radial-gradient(circle at 20% 18%, rgba(255,255,255,0.95) 0 3px, transparent 4px),
+      radial-gradient(circle at 75% 22%, rgba(255,255,255,0.85) 0 2px, transparent 4px),
+      radial-gradient(circle at 82% 52%, rgba(255,255,255,0.75) 0 3px, transparent 6px),
+      radial-gradient(circle at 30% 78%, rgba(255,255,255,0.7) 0 2px, transparent 4px);
+  }
+
+  /* ====== ✅ “다마고치 액정” 느낌: bezel + screen ====== */
+  .pet{
+    position: relative;
+    width: 70%;
+    margin-top: 30px;
+    margin: 0 auto;
+    transform: translateY(10px);
+  }
+
+  /* 바깥 베젤(액정 테두리) */
+  .bezel{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 34px;
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(235,243,255,0.85));
+    border: 4px solid rgba(255,255,255,0.95);
+    box-shadow:
+      inset 0 10px 18px rgba(0,0,0,0.10),
+      0 14px 22px rgba(0,0,0,0.12);
+  }
+
+  /* 안쪽 액정(실제 이미지가 들어가는 곳) */
+  .screen{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 26px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f6ff 100%);
+    border: 3px solid rgba(180,200,240,0.35);
+    box-shadow:
+      inset 0 10px 20px rgba(0,0,0,0.10),
+      inset 0 -14px 18px rgba(0,0,0,0.06);
+  }
+
+  /* 화면 유리 반사 느낌 */
+  .screen::after{
+    content:"";
+    position:absolute;
+    inset:-30% -20% auto -20%;
+    height: 55%;
+    transform: rotate(-10deg);
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+    pointer-events:none;
+  }
+
+  .screen img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition: opacity 200ms ease;
+    filter: saturate(1.05) contrast(1.03);
+  }
+
+  .fade-out{ opacity:0; }
+
+  /* 말풍선 */
   .speech{
+    position:absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    background:white;
+    padding:6px 10px;
+    border-radius:12px;
+    font-size:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    opacity:0;
+    transition:all 200ms ease;
+    pointer-events:none;
+    z-index: 3;
+  }
+  .speech.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 상태 바 */
+.row{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  transform: translateY(8px);
+
+  width: 92%;
+  margin: 18px auto 0;
+  padding: 12px 12px;
+
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(255,255,255,0.92);
+  border-radius: 999px;
+  box-shadow:
+    0 10px 18px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+
+  text-align:center;
+}
+
+.stat{
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 4px;
+  line-height: 1.1;
+}
+
+.stat .label{
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.stat .value{
+  display:flex;              /* ✅ 값+(/100) 같은 줄 */
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stat b{ font-size: 16px; }
+.stat small{ font-size: 12px; opacity: 0.85; }
+
+
+
+
+  /* ====== ✅ 버튼을 곡선으로 배치 ====== */
+.actions{
+  position: relative;
+  width: 88%;              /* ✅ 살짝 줄여서 가운데 여백 확보 */
+  height: 150px;
+  margin: 14px auto 0;     /* ✅ 상태바 아래에서 바로 시작 + 중앙정렬 */
+  padding-bottom: 0;
+}
+
+.arc-track{
   position:absolute;
-  bottom: 20px;
   left: 50%;
-  transform:translateX(-50%) translateY(5px);
-  background:white;
-  padding:6px 10px;
-  border-radius:12px;
-  font-size:14px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  opacity:0;
-  transform:translateY(-5px);
-  transition:all 200ms ease;
+  transform: translateX(-50%);
+  bottom: 28px;            /* ✅ 아래로 쏠림 방지: 위로 올림 */
+  width: 100%;             /* ✅ actions 폭에 딱 맞게 */
+  height: 110px;
+
+  border-radius: 0 0 999px 999px;
+  border: 4px solid rgba(255,255,255,0.95);
+  background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
+  box-shadow: inset 0 8px 18px rgba(0,0,0,0.05);
   pointer-events:none;
 }
 
-.speech.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.pet{
-  position:relative;   /* 이 줄 꼭 있어야 함 */
-}
-
-
-
-body{
-  font-family: system-ui;
-  max-width: 420px;
-  margin: 24px auto;
-  padding: 0 16px;
-  background: radial-gradient(circle at 20% 10%, #ffffff 0%, #f6f6f8 55%, #ececf2 100%);
-}
-
-.card{
-  border-radius: 26px;
-  padding: 18px;
-
-  /* 파스텔 핑크 화면 */
-  background: linear-gradient(180deg, #ffeef7 0%, #ffd7ea 100%);
-
-  /* 기기처럼 두꺼운 베젤 */
-  border: 4px solid rgba(255, 255, 255, 0.9);
-
-  /* 입체감 */
-  box-shadow:
-    0 14px 30px rgba(0,0,0,0.12),
-    0 4px 10px rgba(0,0,0,0.06),
-    inset 0 3px 8px rgba(255,255,255,0.75),
-    inset 0 -10px 18px rgba(0,0,0,0.06);
-}
-
-.pet {
-  width: 100%;
-  border-radius: 16px;
-  background: #f3f3f3;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-}
-
-.pet img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  transition: opacity 200ms ease;
-}
-.fade-out{ opacity:0; }
-
-.fade-out{
-  opacity: 0;
-}
-
-.row{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  margin-top:12px;
-  flex-wrap:nowrap;
-  font-size:13px;
-
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,255,255,0.8);
-  padding: 10px 12px;
-  border-radius: 16px;
-
-  box-shadow:
-    inset 0 2px 6px rgba(255,255,255,0.7),
-    0 6px 14px rgba(0,0,0,0.06);
-}
-
-h1 { text-align:center; }
-
-.actions{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-top:14px;
-}
-
 .actions button{
-  width: 100%;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.7);
-  font-size: 14px;
+  position:absolute;
+  bottom: 56px;  /* ✅ 버튼 전체를 위로 올림 (기존 45~50이면 더 내려가 보임) */
 
-  background: linear-gradient(180deg, #ffffff 0%, #f2f2f6 100%);
-  aspect-ratio: 1 / 1;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 13px;
+
+  /* ✅ 중심 기준 배치(양끝 잘림 방지) */
+  transform: translateX(-50%);
+
+  border: 2px solid rgba(255,255,255,0.92);
+  background: linear-gradient(180deg, #ffffff 0%, #eaf1ff 100%);
+  box-shadow:
+    0 10px 18px rgba(0,0,0,0.15),
+    inset 0 2px 0 rgba(255,255,255,0.95);
+
   display:flex;
+  flex-direction: column;
   align-items:center;
   justify-content:center;
-  text-align:center;
-
-  box-shadow:
-    0 10px 18px rgba(0,0,0,0.10),
-    inset 0 2px 6px rgba(255,255,255,0.9),
-    inset 0 -6px 10px rgba(0,0,0,0.06);
-
-  transform: translateY(0);
-  transition: transform 80ms ease, box-shadow 80ms ease;
 }
 
-.actions button:active{
-  transform: translateY(2px);
-  box-shadow:
-    0 6px 12px rgba(0,0,0,0.10),
-    inset 0 2px 6px rgba(255,255,255,0.9),
-    inset 0 -2px 6px rgba(0,0,0,0.06);
-}
+/* ✅ 곡선(∪) : 가운데 2개만 살짝 아래로 */
+#feedBtn  { left: 18%; transform: translateX(-50%) translateY(-6px); }
+#playBtn  { left: 39%; transform: translateX(-50%) translateY(8px); }
+#bathBtn  { left: 61%; transform: translateX(-50%) translateY(8px); }
+#sleepBtn { left: 82%; transform: translateX(-50%) translateY(-6px); }
 
-.actions button:disabled{
-  opacity: 0.55;
-  filter: grayscale(0.2);
-}
+
+  .actions button:active{
+    transform: translateY(2px);
+    box-shadow:
+      0 8px 14px rgba(0,0,0,0.12),
+      inset 0 2px 0 rgba(255,255,255,0.95),
+      inset 0 -4px 8px rgba(0,0,0,0.05);
+  }
+
+  .actions button:disabled{
+    opacity: 0.55;
+    filter: grayscale(0.2);
+  }
+
+
+
+  /* 모바일 대응 */
+  @media (max-width: 460px){
+    .card{ width: 100%; }
+  }
 </style>
 </head>
 
@@ -151,18 +274,35 @@ h1 { text-align:center; }
 <div class="card">
 
   <div class="pet">
-  <img id="petImg" />
-  <div id="speech" class="speech">냠냠</div>
+    <div class="bezel">
+      <div class="screen">
+        <img id="petImg" />
+        <div id="speech" class="speech">냠냠</div>
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-    <div>배고픔: <b id="hungerText">50</b>/100</div>
-    <div>행복: <b id="happyText">50</b>/100</div>
-    <div>청결: <b id="cleanText">60</b>/100</div>
-    <div>에너지: <b id="energyText">60</b>/100</div>
+<div class="row">
+  <div class="stat">
+    <span class="label">배고픔</span>
+    <span class="value"><b id="hungerText">46</b><small>/100</small></span>
   </div>
+  <div class="stat">
+    <span class="label">행복</span>
+    <span class="value"><b id="happyText">10</b><small>/100</small></span>
+  </div>
+  <div class="stat">
+    <span class="label">청결</span>
+    <span class="value"><b id="cleanText">58</b><small>/100</small></span>
+  </div>
+  <div class="stat">
+    <span class="label">에너지</span>
+    <span class="value"><b id="energyText">42</b><small>/100</small></span>
+  </div>
+</div>
 
   <div class="actions">
+    <div class="arc-track"></div>
     <button id="feedBtn">🍖<br>밥</button>
     <button id="playBtn">🎾<br>놀기</button>
     <button id="bathBtn">🛁<br>목욕</button>
@@ -172,7 +312,6 @@ h1 { text-align:center; }
 </div>
 
 <script>
-  // 숫자 클수록 좋은 상태(배고픔=배부름)
   let hunger = Number(localStorage.getItem("hunger")) || 50;
   let happiness = Number(localStorage.getItem("happiness")) || 50;
   let cleanliness = Number(localStorage.getItem("cleanliness")) || 60;
@@ -190,6 +329,8 @@ h1 { text-align:center; }
   const bathBtn = document.getElementById("bathBtn");
   const sleepBtn = document.getElementById("sleepBtn");
 
+  const speech = document.getElementById("speech");
+
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
   function save() {
@@ -199,48 +340,39 @@ h1 { text-align:center; }
     localStorage.setItem("energy", energy);
   }
 
-  // ✅ 기본(접속할 때마다 랜덤 1장)
-  const DEFAULTS = ["dog_default1.jpg", "dog_default2.jpg", "dog_default3.jpg"];
+  const DEFAULTS = ["dog_default2.jpg", "dog_default3.jpg"];
   let currentDefault = DEFAULTS[Math.floor(Math.random() * DEFAULTS.length)];
-
-  // ✅ hungry 상태 이미지
   const HUNGRY_IMG = "dog_hungry.jpg";
 
-  // ✅ 액션(잠깐 행동사진) 타이머
   let actionTimer = null;
 
-  function applyIdleImage() {
-    if (hunger <= 15) petImg.src = HUNGRY_IMG;
-    else petImg.src = currentDefault;
+function applyIdleImage() {
+  if (hunger <= 15) {
+    setActionImage(HUNGRY_IMG);
+  } else {
+    setActionImage(currentDefault);
   }
+}
 
   function setActionImage(src){
-  petImg.classList.add("fade-out");
+    petImg.classList.add("fade-out");
+    setTimeout(()=>{
+      petImg.src = src;
+      petImg.classList.remove("fade-out");
+    }, 200);
+  }
 
-  setTimeout(()=>{
-    petImg.src = src;
-    petImg.classList.remove("fade-out");
-  }, 200);
-}
-const speech = document.getElementById("speech");
-
-function showSpeech(text, duration=800){
-  speech.textContent = text;
-  speech.classList.add("show");
-
-  setTimeout(()=>{
-    speech.classList.remove("show");
-  }, duration);
-}
-
+  function showSpeech(text, duration=800){
+    speech.textContent = text;
+    speech.classList.add("show");
+    setTimeout(()=> speech.classList.remove("show"), duration);
+  }
 
   function flashImage(src, duration = 800) {
     if (actionTimer) clearTimeout(actionTimer);
-
     setActionImage(src);
-
     actionTimer = setTimeout(() => {
-      applyIdleImage();  //행동 끝나면 상태 복귀
+      applyIdleImage();
       actionTimer = null;
     }, duration);
   }
@@ -258,44 +390,34 @@ function showSpeech(text, duration=800){
       playBtn.disabled = false;
       playBtn.innerHTML = "🎾<br>놀기";
     }
-    // 🔽 에너지 부족 상태 말풍선 유지
-if (energy < 10) {
-  speech.textContent = "졸려… 건들디마 😴";
-  speech.classList.add("show");
-} else {
-  // 에너지 회복되면 제거 (행동 중 아닐 때만)
-  if (!actionTimer) {
-    speech.classList.remove("show");
-  }
-}
 
-    // ✅ 액션 중 아닐 때 상태에 맞는 이미지 유지
+    if (energy < 10) {
+      speech.textContent = "졸려… 건들디마 😴";
+      speech.classList.add("show");
+    } else {
+      if (!actionTimer) speech.classList.remove("show");
+    }
+
     if (!actionTimer) applyIdleImage();
-
     save();
   }
 
-  // ✅ 초기 기본 이미지 세팅
   petImg.src = currentDefault;
   applyIdleImage();
 
-  // 🍖 밥: eat1/eat2 랜덤
   feedBtn.addEventListener("click", () => {
     const EATS = ["dog_eat1.jpg", "dog_eat2.jpg"];
     const randomEat = EATS[Math.floor(Math.random() * EATS.length)];
-    flashImage(randomEat, 800);
+    flashImage(randomEat, 1000);
     showSpeech("냠냠!!😋", 1000);
     hunger = clamp(hunger + 15, 0, 100);
     cleanliness = clamp(cleanliness - 2, 0, 100);
     render();
   });
 
-  // 🎾 놀기: play1
   playBtn.addEventListener("click", () => {
     if (energy < 10) return;
-
-    flashImage("dog_play1.jpg", 800);
-
+    flashImage("dog_play1.jpg", 1000);
     happiness = clamp(happiness + 15, 0, 100);
     energy = clamp(energy - 12, 0, 100);
     hunger = clamp(hunger - 6, 0, 100);
@@ -303,29 +425,24 @@ if (energy < 10) {
     render();
   });
 
-  // 🛁 목욕: dog_bath
   bathBtn.addEventListener("click", () => {
-    flashImage("dog_bath.jpg", 800);
-
+    flashImage("dog_bath.jpg", 1000);
     cleanliness = clamp(cleanliness + 25, 0, 100);
     energy = clamp(energy - 4, 0, 100);
     happiness = clamp(happiness - 1, 0, 100);
     render();
   });
 
-  // 😴 재우기: sleep1~3 랜덤
   sleepBtn.addEventListener("click", () => {
     const SLEEPS = ["dog_sleep1.jpg", "dog_sleep2.jpg", "dog_sleep3.jpg"];
     const randomSleep = SLEEPS[Math.floor(Math.random() * SLEEPS.length)];
-    flashImage(randomSleep, 900);
-
+    flashImage(randomSleep, 1000);
     energy = clamp(energy + 30, 0, 100);
     happiness = clamp(happiness + 5, 0, 100);
     hunger = clamp(hunger - 5, 0, 100);
     render();
   });
 
-  // ⏳ 시간 경과(10초마다)
   setInterval(() => {
     hunger = clamp(hunger - 4, 0, 100);
     energy = clamp(energy - 2, 0, 100);
