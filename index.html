@@ -6,6 +6,33 @@
 <title>블랑고치</title>
 
 <style>
+  .speech{
+  position:absolute;
+  bottom: 20px;
+  left: 50%;
+  transform:translateX(-50%) translateY(5px);
+  background:white;
+  padding:6px 10px;
+  border-radius:12px;
+  font-size:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  opacity:0;
+  transform:translateY(-5px);
+  transition:all 200ms ease;
+  pointer-events:none;
+}
+
+.speech.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.pet{
+  position:relative;   /* 이 줄 꼭 있어야 함 */
+}
+
+
+
 body {
   font-family: system-ui;
   max-width: 420px;
@@ -83,7 +110,8 @@ h1 { text-align:center; }
 <div class="card">
 
   <div class="pet">
-    <img id="petImg"  />
+  <img id="petImg" />
+  <div id="speech" class="speech">냠냠</div>
   </div>
 
   <div class="row">
@@ -153,6 +181,17 @@ h1 { text-align:center; }
     petImg.classList.remove("fade-out");
   }, 200);
 }
+const speech = document.getElementById("speech");
+
+function showSpeech(text, duration=800){
+  speech.textContent = text;
+  speech.classList.add("show");
+
+  setTimeout(()=>{
+    speech.classList.remove("show");
+  }, duration);
+}
+
 
   function flashImage(src, duration = 800) {
     if (actionTimer) clearTimeout(actionTimer);
@@ -194,7 +233,7 @@ h1 { text-align:center; }
     const EATS = ["dog_eat1.jpg", "dog_eat2.jpg"];
     const randomEat = EATS[Math.floor(Math.random() * EATS.length)];
     flashImage(randomEat, 800);
-
+    showSpeech("냠냠!!😋", 1000);
     hunger = clamp(hunger + 15, 0, 100);
     cleanliness = clamp(cleanliness - 2, 0, 100);
     render();
